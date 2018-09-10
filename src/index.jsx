@@ -403,6 +403,16 @@ export default createReactClass({
     }
   },
 
+  doBlur() {
+    if (this.props.onBlur) {
+      const event = document.createEvent('CustomEvent');
+      event.initEvent('Change Date', true, false);
+      const node = ReactDOM.findDOMNode(this.refs.hiddenInput);
+      node && node.dispatchEvent(event);
+      this.props.onBlur(event);
+    }
+  },
+
   handleHide() {
     if (this.state.inputFocused) {
       return;
@@ -410,12 +420,8 @@ export default createReactClass({
     this.setState({
       focused: false
     });
-    if (this.props.onBlur) {
-      const event = document.createEvent('CustomEvent');
-      event.initEvent('Change Date', true, false);
-      ReactDOM.findDOMNode(this.refs.hiddenInput).dispatchEvent(event);
-      this.props.onBlur(event);
-    }
+
+    this.doBlur();
   },
 
   handleKeyDown(e) {
@@ -424,12 +430,7 @@ export default createReactClass({
         focused: false
       });
 
-      if (this.props.onBlur) {
-        const event = document.createEvent('CustomEvent');
-        event.initEvent('Change Date', true, false);
-        ReactDOM.findDOMNode(this.refs.hiddenInput).dispatchEvent(event);
-        this.props.onBlur(event);
-      }
+      this.doBlur();
     }
   },
 
@@ -449,7 +450,8 @@ export default createReactClass({
     if (this.props.onFocus) {
       const event = document.createEvent('CustomEvent');
       event.initEvent('Change Date', true, false);
-      ReactDOM.findDOMNode(this.refs.hiddenInput).dispatchEvent(event);
+      const node = ReactDOM.findDOMNode(this.refs.hiddenInput);
+      node && node.dispatchEvent(event);
       this.props.onFocus(event);
     }
   },
@@ -610,12 +612,7 @@ export default createReactClass({
       focused: false
     });
 
-    if (this.props.onBlur) {
-      const event = document.createEvent('CustomEvent');
-      event.initEvent('Change Date', true, false);
-      ReactDOM.findDOMNode(this.refs.hiddenInput).dispatchEvent(event);
-      this.props.onBlur(event);
-    }
+    this.doBlur();
 
     if (this.props.onChange) {
       this.props.onChange(newSelectedDate.toISOString(), inputValue);
