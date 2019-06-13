@@ -13,6 +13,10 @@ import createReactClass from 'create-react-class';
 let instanceCount = 0;
 
 function getLocalDate(val) {
+  if (val instanceof  Date) {
+    return val;
+  }
+
   let m;
   if (val && (m = String(val).match(/^(\d\d\d\d)-(\d\d)-(\d\d)/))) {
     return new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10), 12);
