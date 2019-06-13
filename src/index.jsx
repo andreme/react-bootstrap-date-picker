@@ -12,6 +12,25 @@ import createReactClass from 'create-react-class';
 
 let instanceCount = 0;
 
+function getLocalDate(val) {
+  let m;
+  if (val && (m = String(val).match(/^(\d\d\d\d)-(\d\d)-(\d\d)/))) {
+    return new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10), 12);
+  } else {
+    return null;
+  }
+}
+
+function getToday() {
+  const today = new Date();
+  today.setHours(12);
+  today.setMinutes(0);
+  today.setSeconds(0);
+  today.setMilliseconds(0);
+
+  return today;
+}
+
 const CalendarHeader = createReactClass({
   displayName: 'DatePickerHeader',
 
@@ -127,10 +146,10 @@ const Calendar = createReactClass({
   },
 
   render() {
-    const currentDate = this.setTimeToNoon(new Date());
-    const selectedDate = this.props.selectedDate ? this.setTimeToNoon(new Date(this.props.selectedDate)) : null;
-    const minDate = this.props.minDate ? this.setTimeToNoon(new Date(this.props.minDate)) : null;
-    const maxDate = this.props.maxDate ? this.setTimeToNoon(new Date(this.props.maxDate)) : null;
+    const currentDate = getToday();
+    const selectedDate = getLocalDate(this.props.selectedDate);
+    const minDate = getLocalDate(this.props.minDate);
+    const maxDate = getLocalDate(this.props.maxDate);
     const year = this.props.displayDate.getFullYear();
     const month = this.props.displayDate.getMonth();
     const firstDay = new Date(year, month, 1);
@@ -155,9 +174,9 @@ const Calendar = createReactClass({
       for (let j = 0; j <= 6; j++) {
         if (day <= monthLength && (i > 0 || j >= startingDay)) {
           let className = null;
-          const date = new Date(year, month, day, 12, 0, 0, 0).toISOString();
-          const beforeMinDate = minDate && Date.parse(date) < Date.parse(minDate);
-          const afterMinDate = maxDate && Date.parse(date) > Date.parse(maxDate);
+          const date = new Date(year, month, day, 12, 0, 0, 0);
+          const beforeMinDate = minDate && date < minDate;
+          const afterMinDate = maxDate && date > maxDate;
           let clickHandler = this.handleClick;
           const style = { cursor: 'pointer', padding: this.props.cellPadding, borderRadius: this.props.roundedCorners ? 5 : 0 };
 
@@ -165,9 +184,9 @@ const Calendar = createReactClass({
             className = 'text-muted';
             clickHandler = null;
             style.cursor = 'default';
-          } else if (Date.parse(date) === Date.parse(selectedDate)) {
+          } else if (selectedDate && (date.toISOString() === selectedDate.toISOString())) {
             className = 'bg-primary';
-          } else if (Date.parse(date) === Date.parse(currentDate)) {
+          } else if (date.toISOString() === currentDate.toISOString()) {
             className = 'text-primary';
           }
 
@@ -364,18 +383,18 @@ export default createReactClass({
 
   makeDateValues(isoString) {
     let displayDate;
-    const selectedDate = isoString ? new Date(`${isoString.slice(0,10)}T12:00:00.000Z`) : null;
-    const minDate = this.props.minDate ? new Date(`${this.props.minDate.slice(0,10)}T12:00:00.000Z`) : null;
-    const maxDate = this.props.maxDate ? new Date(`${this.props.maxDate.slice(0,10)}T12:00:00.000Z`) : null;
+    const selectedDate = getLocalDate(isoString);
+    const minDate = getLocalDate(this.props.minDate);
+    const maxDate = getLocalDate(this.props.maxDate);
 
     const inputValue = isoString ? this.makeInputValueString(selectedDate) : null;
     if (selectedDate) {
       displayDate = new Date(selectedDate);
     } else {
-      const today = new Date(`${(new Date().toISOString().slice(0,10))}T12:00:00.000Z`);
-      if (minDate && Date.parse(minDate) >= Date.parse(today)){
+      const today = getToday();
+      if (minDate && minDate >= today){
         displayDate = minDate;
-      } else if (maxDate && Date.parse(maxDate) <= Date.parse(today)){
+      } else if (maxDate && maxDate <= today){
         displayDate = maxDate;
       } else {
         displayDate = today;
